@@ -1,0 +1,138 @@
+
+\chapter{Theoretical Framework}\label{ch:theoretical_framework}
+
+\section{Structural reliability}
+
+\subsection{Limit state}
+
+The \emph{limit state function} traces the boundary between the safe set and the failure set in the model domain. It is there where the basic random variables are about to no longer satisfy the design requirements. It is possible to speak of the existence of two main categories of limit states: those of serviceability and those of collapse. The former border on the unacceptable during normal use while the latter border on disaster.
+
+\subsection{Probability of failure}
+
+The calculation of the probability of failure is the fundamental objective of structural reliability. Equation \ref{eq:P_f} allows estimating such probability according to whether the response of the structure exceeds a certain threshold or not under the presence of random variables. It is often impossible to solve the integral of equation \ref{eq:P_f} analytically, so there is no choice but to resort to numerical methods such as the Monte Carlo Method. Performing such calculation is computationally expensive, especially the evaluation of the limit state function, then it is an objective to minimize the number of times it is evaluated.
+
+\begin{equation} \label{eq:P_f}
+	P_f = \int_{g(y) \leq 0} p_{\mathbf{\underline{y}}(\mathbf{y})} d\mathbf{y}
+\end{equation}
+
+where
+
+\begin{tabular}{ll}
+	$\mathbf{\underline{y}}$ & vector of random variables \\
+	$p_{\mathbf{\underline{y}}(\mathbf{y})}$& joint density function of $\mathbf{\underline{y}}$ \\
+	$g(\mathbf{y})$ & limit state function \\
+\end{tabular}
+
+\section{Monte Carlo}
+
+\subsection{History}
+
+It was developed primarily by Stanislaw Ulam and John Von Neumann while they were working on the Manhattan project in Los Alamos. The name of the method was suggested by Nicholas Metropolis and comes from the Monte-Carlo casino located in the principality of Monaco, this due to the fact that Ulam came up with the idea while playing a game of Canfield solitaire and wanted to calculate the probability of winning a game. He tried using combinatorics but it was getting overly complex, so he thought that numerous games could be played (or simulated) and the proportion of those that were successful could be calculated.
+
+The use of this method was crucial to the success of the Manhattan project and pseudo-random number generators began to be used for it.
+
+\subsection{Pseudo-random number generators}
+
+These are algorithms that generate numerical sequences that are close to those of a truly random sequence. Although they appear random, they are in fact completely deterministic, since each value depends on the previous one and the first one is generated from a seed that determines the whole sequence.
+
+The deterministic nature allows sequences to be reproducible but they can have weaknesses such as short periods (sequences are repeated over and over again) and poor distributions. There are different algorithms of this type, in this case the one that comes by default in python and is probably the most popular is used: Mersenne Twister.
+
+\subsection{Law of large numbers}
+
+It shows how when performing the same experiment, the average converges to the expected value as the number of times the experiment is performed is increased, as long as it is performed a large enough number of times. In this way it guarantees stable long-term results in random events.
+
+\section{Sampling}
+
+\subsection{Inverse Transform Sampling} \label{sec:ITS}
+
+It is a pseudo-random sampling method that allows samples to be drawn from any \ac{PDF} whose associated \ac{CDF} and its inverse are known.
+
+Given a random variable \(U\) that follows a uniform distribution in  \([0, 1)\) and has an invertible \ac{CDF}, \(X\) can be made to have a distribution \(F_x\) if \(X = F_X^{-1}(U)\). It is necessary to remember that the relationship between the \ac{PDF} \(f_x\) and the \ac{CDF} \(F_x\) is given by equation \ref{eq:CDF}.
+
+\begin{equation} \label{eq:CDF}
+	F_X (x) = \int_{-\infty}^x f_X(t)dt
+\end{equation}
+
+\begin{figure}
+	\myfloatalign
+	\includegraphics[width=0.7\linewidth]{gfx/ITS}
+	\caption{Inverse Transform Sampling Example}
+	\caption*{By Davidjessop, CC BY-SA 4.0, via Wikimedia Commons}
+	\label{fig:its}
+\end{figure}
+
+Figure \ref{fig:its} is quite illustrative. It shows how from a uniform distribution \(U\) in \([0,1)\) in the upper left part and applying the inverse of the \ac{CDF}, which does the mapping, a sampling that follows the normal \ac{PDF} (in this case) is formed.
+
+
+\section{Support Vector Machines}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{gfx/plot}
+	\caption[Support Vector Classifier]{In solid line is the hyperplane that divides the two categories \(\left \langle \mathbf{w}, \mathbf{x} \right \rangle + b = 0\). In dotted line are the lines that limit the margin and pass through the support vectors \(\left \langle \mathbf{w}, \mathbf{x} \right \rangle + b = \pm 1\).}
+	\label{fig:hyperplane}
+\end{figure}
+
+
+In 1963, Vladimir Vapnik and Alexey Chervonenkis developed the original Support Vector Machines. In the 1990s, it was Vapnik himself who extended the uses of \ac{SVM} by making use of the kernel trick (see section \ref{sec:kernel}).
+
+If there are two linearly separable point clouds, by definition it is possible to separate them by at least one hyperplane. It is reasonable to think that the best separating hyperplane is the one that is halfway, being simultaneously away from both clouds so not to be biased. This is called maximizing the margin, defining margin as the distance between the hyperplane and some of the nearest points of each cloud or category. The latter points are called \emph{support vectors}.
+
+It is important to note that once a support vector classifier has been defined, it will only change if samples that are inside the margin are added to it. The hyperplane depends on the support vectors (and their dot product), the vectors further away have no influence, at least in the hard margin \ac{SVM} (hard and soft margins will be discussed about shortly). This is key to understand the proposal of Hurtado and Álvarez (2003) \cite{Hurtado2003}.
+
+It is common to encounter data that are not linearly separable so one might think that \ac{SVM}s are useless in this case. However, a fitting parameter can be introduced to control how much error is admissible. In this case there may be training vectors on the margin and vectors on the wrong side of the hyperplane. This is known as soft margin \ac{SVM}, as opposed to the one discussed above which is consequently known as hard margin \ac{SVM}.
+
+The recently mentioned parameter is called \(C\). When \(C\) is very small only a few classification errors are allowed making the margin wide and spanning many training vectors, becoming time consuming. In contrast, when \(C\) is very large many classification errors are allowed and therefore the margin is smaller.
+
+\subsection{Kernels} \label{sec:kernel}
+
+A kernel represents a dot product in an output space that is usually of a higher dimension than the input space. A kernel has the purpose of measuring the similarity between two vectors. Equation \ref{eq:kernel} shows the computation of a kernel in which \(\phi: \mathbb{R}^n \mapsto \mathbb{R}^m\).
+
+This is done because although in a space the data may not be linearly separable, a mapping can be made to a space where it is and there the optimal hyperplane can be found. This is illustrated in figure \ref{fig:kernel}.
+
+\begin{figure}
+	\myfloatalign
+	\includegraphics[width=0.7\linewidth]{gfx/Kernel}
+	\caption{Kernel trick}
+	\caption*{By Shehzadex, CC BY-SA 4.0, via Wikimedia Commons}
+	\label{fig:kernel}
+\end{figure}
+
+\begin{equation} \label{eq:kernel}
+	K(\mathbf{u}, \mathbf{v}) = \left \langle \phi (\mathbf{u}), \phi (\mathbf{v})\right \rangle
+\end{equation}
+
+It might be thought that it is necessary to evaluate the vectors in \(\phi\) and then do the dot product, which can be time consuming, especially if it is in a high dimension, and in the end obtain a simple scalar. Actually if a suitable kernel is chosen this is not necessary. The beauty of the kernel trick is that neither \(\phi\) nor the output space \(m\) need to be known.
+
+When different kernels are tested, a large number of times common support vectors are found, so their selection is not crucial for the classification, although it is still important.
+
+A disadvantage of kernels is that they may not be intuitive due to the fact that it is generally difficult to properly interpret what they do. They are like a kind of black box.
+
+\subsubsection{Radial Basis Function}
+
+Equations \ref{eq:RBF} and \ref{eq:RBF_gamma} show equivalent ways of expressing the \ac{RBF} kernel which denotes the proximity between two vectors due to its use of the Euclidean norm and its feature space is infinite dimensional.
+
+\begin{equation} \label{eq:RBF}
+	K(\mathbf{u}, \mathbf{v}) = \exp{\left ( - \frac{\left \| \mathbf{u} - \mathbf{v} \right \|^2}{2 \sigma^2} \right )}
+\end{equation}
+
+\begin{align} \label{eq:RBF_gamma}
+	K(\mathbf{u}, \mathbf{v}) &= \exp{\left ( - \gamma \left \| \mathbf{u} - \mathbf{v} \right \|^2\right )} & \gamma &= \frac{1}{2 \sigma^2}
+\end{align}
+
+Although there is an expression for \(\gamma\), it is also considered a free parameter so its value can be adjusted as required.
+
+\section{Algorithm \cite{Hurtado2003}} \label{sec:algorithm}
+
+A databank \(D\) is generated as a set of samples of uniformly distributed variables (note that it is neither necessary nor appropriate to use the associated \ac{PDF}s  due to the fact that the uniform distribution scans the space better).
+
+Two samples should be taken, either from \(D\) or extras. Of those two points there should be one from each category. The choice of these points can be made under different criteria, a useful one is to place extremely unfavorable conditions that will surely lead to failure for \(\mathbf{y_f}\) while for the other point \(\mathbf{y_s}\) too favorable conditions are placed.
+
+With the two existing samples a first hyperplane is calculated. On the other hand, points are taken from the dataset \(D\) and tested if it is within the current margin. If so, this point is added to the training data set \(T\), removed from \(D\) and its corresponding output is calculated. If not, it is still removed from \(D\) but will not be taken into account for \(T\). It is worth remembering that in linearly separable classes only the new points that are within the margin have any influence on the classifier, for the rest it is not worth incorporating them into the model.
+
+Eventually all samples in the database have been checked and \(D\) is empty. On the other hand, \(T\) contains all the necessary samples and the training is finished.
+
+If the size of \(D\) is sufficiently large, the margin should be very small and the support vectors should be very close to the decision function on both sides.
+
+It is necessary to mention that scikit-learn assumes that the data is scaled and centered, so in case it is not, the corresponding preprocessing must be done. In section \ref{sec:2D} a case where the random variables used were normally distributed with mean \(0\) and standard deviation \(1\) will be analyzed, so this step was not necessary.
+
